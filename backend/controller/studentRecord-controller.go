@@ -5,6 +5,7 @@ import (
 	"sa-project-g08/backend/entity"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //Prefix
@@ -155,9 +156,18 @@ func CreateStudentRecord(c *gin.Context) {
 		LastName:    studentrecord.LastName,    // ตั้งค่าฟิลด์ LastName
 		PersonalId:  studentrecord.PersonalId,  // ตั้งค่าฟิลด์ PersonalId
 		StudentCode: studentrecord.StudentCode, // ตั้งค่าฟิลด์ StudentCode
+		Password:    studentrecord.StudentCode, // ตั้งค่าฟิลด์ Password
 		Department:  department,                // โยงความสัมพันธ์กับ Entity Department
 		Advisor:     advisor,                   // โยงความสัมพันธ์กับ Entity Advisor
 	}
+
+	// เข้ารหัสลับรหัสผ่านที่ผู้ใช้กรอกก่อนบันทึกลงฐานข้อมูล
+	bytes, err := bcrypt.GenerateFromPassword([]byte(sr.Password), 14)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error hashing password"})
+		return
+	}
+	sr.Password = string(bytes)
 
 	// 13: บันทึก
 	if err := entity.DB().Create(&sr).Error; err != nil {

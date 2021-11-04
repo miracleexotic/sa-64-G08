@@ -44,7 +44,7 @@ const Login = () => {
             setError(false);
             console.log(content.data.student);
             localStorage.setItem("token", content.data.token);
-            localStorage.setItem("id", content.data.student.id);
+            localStorage.setItem("id", content.data.student.ID);
             localStorage.setItem("prefix", content.data.student.Prefix.Value);
 		    localStorage.setItem("firstname", content.data.student.FirstName);
 		    localStorage.setItem("lastname", content.data.student.LastName);

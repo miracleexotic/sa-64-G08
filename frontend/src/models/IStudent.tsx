@@ -22,7 +22,7 @@ export interface StudentRecordInterface {
 	firstname   : string
 	lastname    : string
 	personalID  : string 
-	code        : string 
+	studentCode : string 
 	departmentID: number           
 	department  : DepartmentInterface      
 }

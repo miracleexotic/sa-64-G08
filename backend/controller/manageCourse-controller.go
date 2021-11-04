@@ -84,11 +84,11 @@ func ListManageCourses(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": manageCourses})
 }
 
-// DELETE /managCourses/:id
-func DeleteManagCourse(c *gin.Context) {
+// DELETE /manageCourses/:id
+func DeleteManageCourse(c *gin.Context) {
 	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM manag_courses WHERE id = ?", id); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "managecourse not found"})
+	if tx := entity.DB().Exec("DELETE FROM manage_courses WHERE id = ?", id); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "manage course not found"})
 		return
 	}
 
@@ -96,21 +96,6 @@ func DeleteManagCourse(c *gin.Context) {
 }
 
 //Course
-// POST /courses
-func CreateCourse(c *gin.Context) {
-	var course entity.Course
-	if err := c.ShouldBindJSON(&course); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := entity.DB().Create(&course).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": course})
-}
-
 // GET /course/:id
 func GetCourse(c *gin.Context) {
 	var course entity.Course
@@ -135,21 +120,6 @@ func ListCourses(c *gin.Context) {
 }
 
 //Room
-// POST /rooms
-func CreateRoom(c *gin.Context) {
-	var room entity.Room
-	if err := c.ShouldBindJSON(&room); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := entity.DB().Create(&room).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": room})
-}
-
 // GET /room/:id
 func GetRoom(c *gin.Context) {
 	var room entity.Room
@@ -174,27 +144,11 @@ func ListRooms(c *gin.Context) {
 }
 
 //TA
-// POST /tas
-func CreateTA(c *gin.Context) { //Ta
-	var ta entity.TA
-	if err := c.ShouldBindJSON(&ta); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := entity.DB().Create(&ta).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": ta})
-}
-
 // GET /ta/:id
 func GetTA(c *gin.Context) {
-	var ta entity.TA
-
+	var ta entity.Room
 	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM tas WHERE id = ?", id).Find(&ta).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM ta WHERE id = ?", id).Scan(&ta).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -205,7 +159,7 @@ func GetTA(c *gin.Context) {
 // GET /tas
 func ListTAs(c *gin.Context) {
 	var tas []entity.TA
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM tas").Find(&tas).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM ta").Scan(&tas).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -214,10 +168,11 @@ func ListTAs(c *gin.Context) {
 }
 
 // GET /professor/:id
+// Get professor by id
 func GetProfessor(c *gin.Context) {
 	var professor entity.Professor
 	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM professors WHERE id = ?", id).Find(&professor).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM professors WHERE id = ?", id).Scan(&professor).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -226,9 +181,10 @@ func GetProfessor(c *gin.Context) {
 }
 
 // GET /professors
+// List all professors
 func ListProfessors(c *gin.Context) {
 	var professors []entity.Professor
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM professors").Find(&professors).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM professors").Scan(&professors).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

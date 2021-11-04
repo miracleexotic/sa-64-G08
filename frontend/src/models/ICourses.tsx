@@ -2,36 +2,36 @@
 
 export interface TAInterface {
 	ID   : number
-	code : string        
-	name : string        
+	TaCode : string        
+	Name : string        
 }
 
 export interface RoomInterface {
 	ID          : number
-	number      : number         
-	studentCount: number           
+	Number      : number         
+	StudentCount: number           
 }
 
 export interface CourseInterface {
 	ID    : number
 	CourseCode  : string       
 	Name  : string        
-	credit: number         
+	Credit: number         
 }
 
 export interface ManageCourseInterface {
 	ID : number
-	group           : number              
-	teachingTime    : number             
-	ungraduatedYear : number             
-	trimester       : number             
-	manageCourseTime: Date | null      
-	courseID        : number          
+	Group           : number              
+	TeachingTime    : number             
+	UngraduatedYear : number             
+	Trimester       : number             
+	ManageCourseTime: Date | null      
+	CourseID        : number          
 	Course          : CourseInterface            
-	roomID          : number           
-	room            : RoomInterface               
-	taID            : number             
-	ta              : TAInterface       
+	RoomID          : number           
+	Room            : RoomInterface               
+	TaID            : number             
+	Ta              : TAInterface       
 }
 
 

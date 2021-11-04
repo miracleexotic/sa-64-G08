@@ -11,6 +11,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Alert from '@material-ui/lab/Alert';
 import Snackbar from "@material-ui/core/Snackbar";
+import Typography from "@material-ui/core/Typography";
 
 import moment from 'moment';
 import { RequestRegisterInterface } from "../models/IRequest";
@@ -64,13 +65,13 @@ function RequestFollow() {
         setRequestRegister(content)
     }
 
-    const sleep = (milliseconds: any) => {
+    const sleep = (milliseconds: number) => {
         return new Promise(resolve => setTimeout(resolve, milliseconds))
     }
 
     const handleCancel = async (id: number) => {
-        let url = "http://localhost:8080/requestregister?id="+id
-        const reponse = await fetch(url, {
+        let apiUrl = "http://localhost:8080/requestregister?id="+id
+        const reponse = await fetch(apiUrl, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -107,6 +108,9 @@ function RequestFollow() {
               </Alert>
             </Snackbar>
             <Container className={classes.container} maxWidth="md">
+            <Typography variant="h5" align='center' style={{marginTop: '1rem', marginBottom: '1rem'}} >
+                ใบคำร้องเพิ่มถอนรายวิชา
+            </Typography>
             <TableContainer component={Paper} className={classes.tableSpace}>
                 <Table className={classes.table} aria-label="simple table">
                 <TableHead>
@@ -114,14 +118,14 @@ function RequestFollow() {
                     <TableCell align="center" width="5%">
                         ลำดับ
                     </TableCell>
-                    <TableCell align="right" width="10%">
+                    <TableCell align="right" width="13%">
                         รหัสรายวิชา
                     </TableCell>
                     <TableCell align="left" width="20%">
                         ชื่อรายวิชา
                     </TableCell>
-                    <TableCell align="center" width="10%">
-                        ประเภท
+                    <TableCell align="center" width="12%">
+                        ประเภทใบคำร้อง
                     </TableCell>
                     <TableCell align="center" width="10%">
                         สถานะ
@@ -138,7 +142,7 @@ function RequestFollow() {
                     {requestRegister.map((request: RequestRegisterInterface, index) => (
                     <TableRow key={request.manageCourseID}>
                         <TableCell align="center">{index + 1}</TableCell>
-                        <TableCell align="right">{request.manageCourse.Course.CourseCode}</TableCell>
+                        <TableCell align="right">{request.manageCourse.Course.CourseCode+" - "+request.manageCourse.Group}</TableCell>
                         <TableCell align="left">{request.manageCourse.Course.Name}</TableCell>
                         <TableCell align="center">{request.requestType.name}</TableCell>
                         <TableCell align="center">{request.requestStatus.name}</TableCell>

@@ -7,9 +7,11 @@ import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
 import Alert from '@material-ui/lab/Alert';
 import Snackbar from "@material-ui/core/Snackbar";
+import Divider from '@material-ui/core/Divider';
 
 import { ManageCourseInterface } from "../models/ICourses";
-import { RequestStatusInterface, RequestTypeInterface } from "../models/IRequest";
+import { RequestStatusInterface, RequestTypeInterface, RequestRegisterInterface } from "../models/IRequest";
+
 import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
@@ -39,7 +41,7 @@ function RequestRegister() {
     const [requestTypes, setRequestType] = useState<RequestTypeInterface[]>([]);
     const [requestStatuses, setRequestStatus] = useState<RequestStatusInterface[]>([]);
 
-    const getCourse = async (id?: number) => {
+    const getCourse = async () => {
         let apiUrl: string = "http://localhost:8080"
         apiUrl = apiUrl + "/manageCourses"
 
@@ -56,7 +58,7 @@ function RequestRegister() {
         setCourse(content.data)
     }
 
-    const getRequestType = async (id?: number) => {
+    const getRequestType = async () => {
         let apiUrl: string = "http://localhost:8080"
         apiUrl = apiUrl + "/requestregister/type"
 
@@ -73,7 +75,7 @@ function RequestRegister() {
         setRequestType(content)
     }
 
-    const getRequestStatus = async (id?: number) => {
+    const getRequestStatus = async () => {
         let apiUrl: string = "http://localhost:8080"
         apiUrl = apiUrl + "/requestregister/status"
         
@@ -90,29 +92,62 @@ function RequestRegister() {
         setRequestStatus(content)
     }
 
+    const [requestRegisters, setRequestRegisters] = useState<RequestRegisterInterface[]>([]);
+    const getRequestRegisters = async () => {
+        const reponse = await fetch("http://localhost:8080/requestregisters", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
+        });
+        
+        const content = await reponse.json()
+        console.log(content)
+        setRequestRegisters(content)
+    }
+
     const [courseSelect, setCourseSelect] = useState<number>()
     const [requestTypeSelect, setRequestTypeSelect] = useState<number>()
+    const [requestUnUseTypeSelect, setRequestUnUseTypeSelect] = useState<number>(0)
     const [requestStatusSelect, setRequestStatusSelect] = useState<number>(1)
 
     const handleCourseChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+        getRequestRegisters()
         console.log(e.target.value)
-        setCourseSelect(e.target.value as number)
-        getCourse(courseSelect)
+        for (var i=0; i<requestRegisters.length; i++) {
+            if ((requestRegisters[i].manageCourseID === (e.target.value as number)) && (requestRegisters[i].requestStatusID !== 2)) {
+                setCourseSelect(0)
+                break
+            } else {
+                if ((requestRegisters[i].manageCourseID === (e.target.value as number)) && (requestRegisters[i].requestStatusID === 2)) {
+                    setRequestUnUseTypeSelect(requestRegisters[i].requestTypeID)
+                }
+                setCourseSelect(e.target.value as number)
+            }
+        }
     }
-    const handleCourseTypeChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+
+    const handleRequestTypeChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+        getRequestRegisters()
         console.log(e.target.value)
-        setRequestTypeSelect(e.target.value as number)
-        getRequestType(requestTypeSelect)
+        if ((e.target.value as number) === requestUnUseTypeSelect) {
+            setRequestTypeSelect(0)
+        } else {
+            setRequestTypeSelect(e.target.value as number)
+        }
     }
-    const handleCourseStatusChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+
+    const handleRequestStatusChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+        getRequestRegisters()
         console.log(e.target.value as string)
         setRequestStatusSelect(e.target.value as number)
-        getRequestStatus(requestStatusSelect)
     }
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     
     const handleDateChange = (date: Date | null) => {
+        getRequestRegisters()
         console.log(date)
         setSelectedDate(date);
 
@@ -120,6 +155,8 @@ function RequestRegister() {
 
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
+    const [errorCourse, setErrorCourse] = useState(false);
+    const [errorType, setErrorType] = useState(false);
 
     const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
         if (reason === "clickaway") {
@@ -127,6 +164,8 @@ function RequestRegister() {
         }
         setSuccess(false);
         setError(false);
+        setErrorCourse(false);
+        setErrorType(false);
     };
 
     const submit = async () => {
@@ -152,11 +191,19 @@ function RequestRegister() {
         const content = await response.json();
         console.log(content)
         if (content.error) {
+            if (courseSelect === 0) {
+                setErrorCourse(true)
+            } else if (requestTypeSelect === 0) {
+                setErrorType(true);
+            } else {
+                setError(true);
+            }
             setSuccess(false);
-            setError(true);
         } else {
             setSuccess(true);
             setError(false);
+            setErrorCourse(false);
+            setErrorType(false);
         }
         
     }
@@ -164,8 +211,9 @@ function RequestRegister() {
     useEffect(() => {
         getCourse()
         getRequestType()
-        getRequestStatus()        
-    }, [courseSelect, requestTypeSelect, requestStatusSelect])
+        getRequestStatus()
+        getRequestRegisters()        
+    }, [])
 
     return (
         <div className={classes.root}>
@@ -174,12 +222,32 @@ function RequestRegister() {
                 บันทึกข้อมูลสำเร็จ
             </Alert>
           </Snackbar>
-           <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
+          <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
             <Alert onClose={handleClose} severity="error" variant="filled">
                 บันทึกข้อมูลไม่สำเร็จ
             </Alert>
           </Snackbar>
+          <Snackbar open={errorCourse} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="error" variant="filled">
+                บันทึกข้อมูลไม่สำเร็จ เนื่องจากรายวิชาซ้ำซ้อน
+            </Alert>
+          </Snackbar>
+          <Snackbar open={errorType} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="error" variant="filled">
+                บันทึกข้อมูลไม่สำเร็จ เนื่องจากประเภทใบคำร้องชนิดนี้ได้รับการอนุมัติแล้ว
+            </Alert>
+          </Snackbar>
           <Grid container spacing={1} >
+            <Grid container item xs={12} spacing={3}>
+                <React.Fragment>
+                    <Grid item xs={12}>
+                        <Typography variant="h5" align='center' style={{marginBottom: '.5rem'}} >
+                            กรอกใบคำร้องเพิ่มถอนรายวิชา
+                        </Typography>
+                        <Divider style={{marginBottom: '.5rem'}} />
+                    </Grid>
+                </React.Fragment>
+            </Grid>
             <Grid container item xs={12} spacing={3}>
                 <React.Fragment>
                     <Grid item xs={6}>
@@ -193,7 +261,7 @@ function RequestRegister() {
                                 onChange={handleCourseChange}
                             >
                                 {courses.map((course: ManageCourseInterface, index) => (
-                                    <MenuItem key={index} value={course.ID}>{course.Course.CourseCode}</MenuItem>
+                                    <MenuItem key={index} value={course.ID}>{course.Course.CourseCode+" - "+course.Group}</MenuItem>
                                 ))}
                             </TextField>
                         </Typography>
@@ -210,7 +278,7 @@ function RequestRegister() {
                     <Grid item xs={6}>
                         <Typography align='left'>
                             <TextField size='small' variant="outlined" id="select" label="ประเภท" value={requestTypeSelect} select style={{width: 200}} 
-                                onChange={handleCourseTypeChange}
+                                onChange={handleRequestTypeChange}
                             >
                                 {requestTypes.map((type: RequestTypeInterface, index) => (
                                     <MenuItem key={index} value={type.ID}>{type.name}</MenuItem>
@@ -229,8 +297,8 @@ function RequestRegister() {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography align='left'>
-                            <TextField id="select" label="สถานะ" value={1} disabled select style={{width: 200}} 
-                                onChange={handleCourseStatusChange}
+                            <TextField id="select" label="สถานะ" value={requestStatusSelect} disabled select style={{width: 200}} 
+                                onChange={handleRequestStatusChange}
                             >
                                 {requestStatuses.map((status: RequestStatusInterface, index) => (
                                     <MenuItem key={index} value={status.ID}>{status.name}</MenuItem>
