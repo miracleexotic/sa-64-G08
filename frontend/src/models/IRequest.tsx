@@ -1,4 +1,4 @@
-import { CourseInterface, ManageCourseInterface } from "./ICourses";
+import { ManageCourseInterface } from "./ICourses";
 import { StudentRecordInterface } from "./IStudent";
 
 export interface RequestTypeInterface {
@@ -15,10 +15,10 @@ export interface RequestRegisterInterface {
 	ID          	: number 
 	manageCourseID  : number
 	manageCourse	: ManageCourseInterface
-	typeID      	: number
-	type        	: RequestTypeInterface
-	statusID    	: number
-	status      	: RequestStatusInterface
+	requestTypeID   : number
+	requestType     : RequestTypeInterface
+	requestStatusID : number
+	requestStatus   : RequestStatusInterface
 	ownerID     	: number
 	owner       	: StudentRecordInterface
 	requestTime 	: Date | null

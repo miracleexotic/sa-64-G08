@@ -6,35 +6,35 @@ import (
 	"gorm.io/gorm"
 )
 
-type Enrollment struct {
+type EnrollmentType struct {
 	gorm.Model
-	EnrollDateTime  time.Time `json:"enrollDateTime"`
-	EnrollYear      uint      `json:"enrollYear"`
-	EnrollTrimester uint      `json:"enrollTrimester"`
-	TotalCredit     uint      `json:"totalCredit"`
+	Name string
 
-	OwnerID *uint         `json:"ownerID"`
-	Owner   StudentRecord `json:"owner"`
-
-	EnrollmentItem []EnrollmentItem `json:"-" gorm:"foreignKey:EnrollmentID"`
+	EnrollmentItems []EnrollmentItem `gorm:"foreignKey:EnrollmentTypeID"`
 }
 
-type CourseType struct {
+type Enrollment struct {
 	gorm.Model
-	Name string `json:"name"`
+	EnrollYear      uint
+	EnrollTrimester uint
+	EnrollDateTime  time.Time
+	TotalCredit     uint
 
-	EnrollmentItem []EnrollmentItem `json:"-" gorm:"foreignKey:CourseTypeID"`
+	OwnerID *uint
+	Owner   StudentRecord `gorm:"references:ID"`
+
+	EnrollmentItems []EnrollmentItem `gorm:"foreignKey:EnrollmentID"`
 }
 
 type EnrollmentItem struct {
 	gorm.Model
 
-	EnrollmentID *uint      `json:"enrollmentID"`
-	Enrollment   Enrollment `json:"enrollment"`
+	EnrollmentID *uint
+	Enrollment   Enrollment `gorm:"references:ID"`
 
-	ManageCourseID *uint        `json:"manageCourseID"`
-	ManageCourse   ManageCourse `json:"manageCourse"`
+	EnrollmentTypeID *uint
+	EnrollmentType   EnrollmentType `gorm:"references:ID"`
 
-	CourseTypeID *uint      `json:"courseTypeID"`
-	CourseType   CourseType `json:"courseType"`
+	ManageCourseID *uint
+	ManageCourse   ManageCourse `gorm:"references:ID"`
 }

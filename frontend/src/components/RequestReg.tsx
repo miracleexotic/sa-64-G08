@@ -16,7 +16,6 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from '@material-ui/pickers';
-import { StudentRecordInterface, DepartmentInterface, TeacherRecordInterface, FacultyInterface, PrefixInterface } from "../models/IStudent";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -35,74 +34,59 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function RequestRegister() {
     const classes = useStyles(); 
-    const [name, setName] = useState<StudentRecordInterface>()
-
-    const getStudent = async () => {
-      const reponse = await fetch("http://localhost:8080/api/login", {
-          method: "GET",
-          headers: {"Content-Type" : "application/json"},
-          credentials: "include",
-      });
-      
-      const content = await reponse.json()
-      console.log(content)
-      if (content.message) {
-        var prefix: PrefixInterface = {ID: 0, value: ""}
-        var faculty: FacultyInterface = {ID: 0, name: ""}
-        var department: DepartmentInterface = {ID: 0, name: "", facultyID: 0, faculty: faculty}
-        var teacher: TeacherRecordInterface = {ID: 0, teacherName: "", teacherEmail: ""}
-        setName({...name, ID: 0, 
-            prefixID: 0,
-            prefix: prefix, 
-            firstname: "", 
-            lastname: "", 
-            code: "", 
-            personalID: "", 
-            departmentID: 0, 
-            department: department, 
-            adviserID: 0, 
-            adviser: teacher})
-      } else {
-        console.log(content.ID)
-        setName(content)
-      }
-      
-    }
 
     const [courses, setCourse] = useState<ManageCourseInterface[]>([]);
     const [requestTypes, setRequestType] = useState<RequestTypeInterface[]>([]);
     const [requestStatuses, setRequestStatus] = useState<RequestStatusInterface[]>([]);
 
     const getCourse = async (id?: number) => {
-        const reponse = await fetch("http://localhost:8080/api/course/list", {
+        let apiUrl: string = "http://localhost:8080"
+        apiUrl = apiUrl + "/manageCourses"
+
+        const reponse = await fetch(apiUrl, {
             method: "GET",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
         });
         
         const content = await reponse.json()
-        setCourse(content)
+        console.log(content)
+        setCourse(content.data)
     }
 
     const getRequestType = async (id?: number) => {
-        const reponse = await fetch("http://localhost:8080/api/requestregister/type", {
+        let apiUrl: string = "http://localhost:8080"
+        apiUrl = apiUrl + "/requestregister/type"
+
+        const reponse = await fetch(apiUrl, {
             method: "GET",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
         });
         
         const content = await reponse.json()
+        console.log(content)
         setRequestType(content)
     }
 
     const getRequestStatus = async (id?: number) => {
-        const reponse = await fetch("http://localhost:8080/api/requestregister/status", {
+        let apiUrl: string = "http://localhost:8080"
+        apiUrl = apiUrl + "/requestregister/status"
+        
+        const reponse = await fetch(apiUrl, {
             method: "GET",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
         });
         
         const content = await reponse.json()
+        console.log(content)
         setRequestStatus(content)
     }
 
@@ -126,13 +110,12 @@ function RequestRegister() {
         getRequestStatus(requestStatusSelect)
     }
 
-    const [selectedDate, setSelectedDate] = useState<Date | null>(
-        new Date(Date.now()),
-    );
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     
     const handleDateChange = (date: Date | null) => {
         console.log(date)
         setSelectedDate(date);
+
     };
 
     const [success, setSuccess] = useState(false);
@@ -147,25 +130,22 @@ function RequestRegister() {
     };
 
     const submit = async () => {
-        if (name?.ID === 0) {
-            setSuccess(false);
-            setError(true);
-            return
-        }
         
         let body: any 
         body = JSON.stringify({
-            "manageCourseID":    courseSelect, // 1
-            "typeID":      requestTypeSelect, // 3
-            "statusID":    requestStatusSelect, // 4
+            "manageCourseID":    courseSelect,
+            "requestTypeID":      requestTypeSelect,
+            "requestStatusID":    requestStatusSelect,
             "requestTime": selectedDate,
         })
         console.log(body)
 
-        const response = await fetch("http://localhost:8080/api/requestregister", {
+        const response = await fetch("http://localhost:8080/requestregister", {
             method: "POST",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
             body: body
         });
 
@@ -182,13 +162,10 @@ function RequestRegister() {
     }
 
     useEffect(() => {
-        getStudent()
-        getCourse(courseSelect)
-        getRequestType(requestTypeSelect)
-        getRequestStatus()
-        getRequestStatus(requestStatusSelect)
-        
-    }, [])
+        getCourse()
+        getRequestType()
+        getRequestStatus()        
+    }, [courseSelect, requestTypeSelect, requestStatusSelect])
 
     return (
         <div className={classes.root}>
@@ -216,7 +193,7 @@ function RequestRegister() {
                                 onChange={handleCourseChange}
                             >
                                 {courses.map((course: ManageCourseInterface, index) => (
-                                    <MenuItem key={index} value={course.ID}>{course.course.code}</MenuItem>
+                                    <MenuItem key={index} value={course.ID}>{course.Course.CourseCode}</MenuItem>
                                 ))}
                             </TextField>
                         </Typography>

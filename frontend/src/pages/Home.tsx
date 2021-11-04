@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 
@@ -23,30 +22,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Home = () => {
     const classes = useStyles();
-
-    const [islogin, setIsLogin] = useState(false)
-    const [name, setName] = useState("")
-
-    const getStudent = async () => {
-        const response = await fetch("http://localhost:8080/api/login", {
-            method: "GET",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
-        });
-        
-        const content = await response.json()
-        console.log(content)
-        if (content.message) {
-            setIsLogin(false)
-        } else {
-            setIsLogin(true)
-            setName(content.code + " " + content.prefix.value + content.firstname + " " + content.lastname)
-        }
-    }
-
-    useEffect(() => {
-        getStudent()
-    }, [])
 
     return (
         <div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, SyntheticEvent } from "react";
+import React, { useEffect, useState } from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
@@ -13,9 +13,6 @@ import Alert from '@material-ui/lab/Alert';
 import Snackbar from "@material-ui/core/Snackbar";
 
 import moment from 'moment';
-import { ManageCourseInterface } from "../models/ICourses";
-import { RequestStatusInterface, RequestTypeInterface } from "../models/IRequest";
-import { StudentRecordInterface, DepartmentInterface, TeacherRecordInterface, FacultyInterface, PrefixInterface } from "../models/IStudent";
 import { RequestRegisterInterface } from "../models/IRequest";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -38,37 +35,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function RequestFollow() {
     const classes = useStyles(); 
-    const [name, setName] = useState<StudentRecordInterface>()
-
-    const getStudent = async () => {
-      const reponse = await fetch("http://localhost:8080/api/login", {
-          method: "GET",
-          headers: {"Content-Type" : "application/json"},
-          credentials: "include",
-      });
-      
-      const content = await reponse.json()
-      if (content.message) {
-        var prefix: PrefixInterface = {ID: 0, value: ""}
-        var faculty: FacultyInterface = {ID: 0, name: ""}
-        var department: DepartmentInterface = {ID: 0, name: "", facultyID: 0, faculty: faculty}
-        var teacher: TeacherRecordInterface = {ID: 0, teacherName: "", teacherEmail: ""}
-        setName({...name, ID: 0, 
-            prefixID: 0,
-            prefix: prefix,  
-            firstname: "", 
-            lastname: "", 
-            code: "", 
-            personalID: "", 
-            departmentID: 0, 
-            department: department, 
-            adviserID: 0, 
-            adviser: teacher})
-      } else {
-        setName(content)
-      }
-      
-    }
 
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
@@ -85,10 +51,12 @@ function RequestFollow() {
     const [requestRegister, setRequestRegister] = useState<RequestRegisterInterface[]>([]);
 
     const getRequest = async () => {
-        const reponse = await fetch("http://localhost:8080/api/requestregisters", {
+        const reponse = await fetch("http://localhost:8080/requestregisters", {
             method: "GET",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type" : "application/json",
+            },
         });
         
         const content = await reponse.json()
@@ -101,11 +69,13 @@ function RequestFollow() {
     }
 
     const handleCancel = async (id: number) => {
-        let url = "http://localhost:8080/api/requestregister?id="+id
+        let url = "http://localhost:8080/requestregister?id="+id
         const reponse = await fetch(url, {
           method: "DELETE",
-          headers: {"Content-Type" : "application/json"},
-          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type" : "application/json",
+          },
         });
 
         const content = await reponse.json()
@@ -121,7 +91,6 @@ function RequestFollow() {
     }
 
     useEffect(() => {
-        getStudent()
         getRequest()
     }, [])
 
@@ -169,13 +138,13 @@ function RequestFollow() {
                     {requestRegister.map((request: RequestRegisterInterface, index) => (
                     <TableRow key={request.manageCourseID}>
                         <TableCell align="center">{index + 1}</TableCell>
-                        <TableCell align="right">{request.manageCourse.course.code}</TableCell>
-                        <TableCell align="left">{request.manageCourse.course.name}</TableCell>
-                        <TableCell align="center">{request.type.name}</TableCell>
-                        <TableCell align="center">{request.status.name}</TableCell>
+                        <TableCell align="right">{request.manageCourse.Course.CourseCode}</TableCell>
+                        <TableCell align="left">{request.manageCourse.Course.Name}</TableCell>
+                        <TableCell align="center">{request.requestType.name}</TableCell>
+                        <TableCell align="center">{request.requestStatus.name}</TableCell>
                         <TableCell align="center">{moment(request.requestTime).format("DD/MM/YYYY HH:mm A")}</TableCell>
                         <TableCell align="center">
-                            { request.status.ID !== 1 ?
+                            { request.requestStatus.ID !== 1 ?
                             (<Button variant="contained" color="secondary" size="small" disabled>
                                 ยกเลิก
                             </Button>) :

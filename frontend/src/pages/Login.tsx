@@ -1,7 +1,6 @@
 import React, {SyntheticEvent, useState} from 'react'
 import { Redirect } from 'react-router';
 import Button from "@material-ui/core/Button";
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import Container from "@material-ui/core/Container";
@@ -9,22 +8,7 @@ import TextField from "@material-ui/core/TextField";
 import Alert from '@material-ui/lab/Alert';
 import Snackbar from "@material-ui/core/Snackbar";
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1,
-    },
-    paper: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-    },
-  }),
-);
-
-const Login = (props: {setRedirect: (redirect: boolean) => void}) => {
-    props.setRedirect(false)
-    const classes = useStyles();
+const Login = () => {
 
     const [studentCode, setStudentCode] = useState("");
     const [password, setPassword] = useState("");
@@ -44,21 +28,27 @@ const Login = (props: {setRedirect: (redirect: boolean) => void}) => {
     const submit = async (e: SyntheticEvent) => {
         e.preventDefault()
 
-        const response = await fetch("http://localhost:8080/api/login", {
+        const response = await fetch("http://localhost:8080/student/login", {
             method: "POST",
             headers: {"Content-Type" : "application/json"},
-            credentials: "include",
             body: JSON.stringify({
-                "Student_code": studentCode,
-                "Password": password
+                "userCode": studentCode,
+                "password": password
             })
         });
 
         const content = await response.json();
-        if (content.message === "success") {
+        if (content.data) {
+            setRedirect(true);
             setSuccess(true);
             setError(false);
-            setRedirect(true);
+            console.log(content.data.student);
+            localStorage.setItem("token", content.data.token);
+            localStorage.setItem("id", content.data.student.id);
+            localStorage.setItem("prefix", content.data.student.Prefix.Value);
+		    localStorage.setItem("firstname", content.data.student.FirstName);
+		    localStorage.setItem("lastname", content.data.student.LastName);
+		    localStorage.setItem("studentCode", content.data.student.StudentCode);
             window.location.reload();
         } else {
             setSuccess(false);

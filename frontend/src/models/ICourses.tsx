@@ -1,4 +1,4 @@
-import { TeacherRecordInterface } from "./IStudent";
+// import { TeacherRecordInterface } from "./IStudent";
 
 export interface TAInterface {
 	ID   : number
@@ -14,8 +14,8 @@ export interface RoomInterface {
 
 export interface CourseInterface {
 	ID    : number
-	code  : string       
-	name  : string        
+	CourseCode  : string       
+	Name  : string        
 	credit: number         
 }
 
@@ -27,11 +27,9 @@ export interface ManageCourseInterface {
 	trimester       : number             
 	manageCourseTime: Date | null      
 	courseID        : number          
-	course          : CourseInterface            
+	Course          : CourseInterface            
 	roomID          : number           
-	room            : RoomInterface             
-	teacherID       : number             
-	teacher         : TeacherRecordInterface    
+	room            : RoomInterface               
 	taID            : number             
 	ta              : TAInterface       
 }

@@ -8,29 +8,33 @@ import (
 
 type Place struct {
 	gorm.Model
-	Name string `json:"name"`
+	Name string
 
-	Bill []Bill `json:"-" gorm:"foreignKey:PlaceID"`
+	Bills []Bill `gorm:"foreignKey:PlaceID"`
 }
 
 type PaymentType struct {
 	gorm.Model
-	Name string `json:"name"`
+	Name string
 
-	Bill []Bill `json:"-" gorm:"foreignKey:PaymentTypeID"`
+	Bills []Bill `gorm:"foreignKey:PaymentTypeID"`
 }
 
 type Bill struct {
+	//มี ID ที่เป็น primarykey
 	gorm.Model
-	BillTime   time.Time `json:"billTime"`
-	TotalPrice uint      `json:"totalPrice"`
 
-	EnrollmentID *uint      `json:"enrollmentID"`
-	Enrollment   Enrollment `json:"enrollment"`
+	BillTime time.Time
 
-	PlaceID *uint `json:"placeID"`
-	Place   Place `json:"place"`
+	EnrollmentID *uint      `gorm:"uniqueIndex"`
+	Enrollment   Enrollment `gorm:"references:ID; constraint:OnDelete:CASCADE"`
+	//ลบใบลงทะเบียน บิลหาย (1 - 1)
 
-	PaymentTypeID *uint       `json:"paymentTypeID"`
-	PaymentType   PaymentType `json:"paymentType"`
+	PaymentTypeID *uint
+	PaymentType   PaymentType `gorm:"references:ID"`
+
+	PlaceID *uint
+	Place   Place `gorm:"references:ID"`
+
+	TotalPrice uint
 }

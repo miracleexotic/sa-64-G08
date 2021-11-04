@@ -1,9 +1,6 @@
 package entity
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -20,44 +17,42 @@ func SetupDatabase() {
 		panic("failed to connect database")
 	}
 
+	database.AutoMigrate(
+		// Student Record subsystem
+		&Prefix{},
+		&Faculty{},
+		&Department{},
+		&StudentRecord{},
+
+		// Manage Course subsystem
+		&Professor{},
+		&TA{},
+		&Room{},
+		&Course{},
+		&ManageCourse{},
+
+		// Enrollment Register subsystem
+		&Enrollment{},
+		&EnrollmentType{},
+		&EnrollmentItem{},
+
+		// Bill subsystem
+		&Place{},
+		&PaymentType{},
+		&Bill{},
+
+		// Request Register subsystem
+		&RequestStatus{},
+		&RequestType{},
+		&RequestRegister{},
+	)
+
 	db = database
 
-	// init database
+	// เตรียมข้อมูลสำหรับระบบย่อย
+	Init_Student()
+	Init_ManageCourse()
+	Init_Enrollment()
+	Init_Bill()
 	Init_RequestRegister()
-
-	//
-	// === Query
-	//
-
-	var target StudentRecord
-	db.Model(&StudentRecord{}).Find(&target, db.Where("code = ?", "B6225605"))
-
-	var RequestRegisters []RequestRegister
-	db.Model(&RequestRegister{}).
-		Joins("ManageCourse").
-		Joins("Type").
-		Joins("Status").
-		Joins("Owner").
-		Find(&RequestRegisters, db.Where("owner_id = ?", target.ID))
-	for i, v := range RequestRegisters {
-		db.Model(&TeacherRecord{}).Where("id = ?", v.ManageCourse.TeacherID).Scan(&RequestRegisters[i].ManageCourse.Teacher)
-		db.Model(&TA{}).Where("id = ?", v.ManageCourse.TaID).Scan(&RequestRegisters[i].ManageCourse.Ta)
-		db.Model(&Room{}).Where("id = ?", v.ManageCourse.RoomID).Scan(&RequestRegisters[i].ManageCourse.Room)
-		db.Model(&Course{}).Where("id = ?", v.ManageCourse.CourseID).Scan(&RequestRegisters[i].ManageCourse.Course)
-	}
-
-	for _, v := range RequestRegisters {
-		fmt.Println("Code : ", v.ManageCourse.Course.Code)
-		fmt.Println("Name : ", v.ManageCourse.Course.Name)
-		fmt.Println("Type : ", v.Type.Name)
-		fmt.Println("Status : ", v.Status.Name)
-		fmt.Println("Datetime : ", v.RequestTime)
-		fmt.Println("====")
-	}
-
-	data, err := json.MarshalIndent(RequestRegisters, "", "    ")
-	if err != nil {
-		panic("fail")
-	}
-	fmt.Println(string(data))
 }

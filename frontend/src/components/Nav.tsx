@@ -1,11 +1,9 @@
-import React, {useState,useEffect} from 'react'
 import { Link } from 'react-router-dom'
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import { Redirect } from 'react-router';
 import Grid from '@material-ui/core/Grid';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
@@ -16,53 +14,16 @@ const useStyles = makeStyles((theme) => ({
     navlink: {color: "white",textDecoration: "none"},
 }));
 
-function Nav(props: {redirect: boolean, setRedirect: (redirect: boolean) => void}) {
+function Nav() {
     const classes = useStyles(); 
-    const [islogin, setIsLogin] = useState(false)
-    const [name, setName] = useState("")
 
-    const getStudent = async () => {
-      const reponse = await fetch("http://localhost:8080/api/login", {
-          method: "GET",
-          headers: {"Content-Type" : "application/json"},
-          credentials: "include",
-      });
-      
-      const content = await reponse.json()
-      console.log(content)
-      if (content.message) {
-        setIsLogin(false)
-      } else {
-        setIsLogin(true)
-        setName(content.code + " " + content.prefix.value + content.firstname + " " + content.lastname)
-      }
-      
-    }
-
-    useEffect(() => {
-      getStudent()
-    }, [])
-
-    const logout = async () => {
-        await fetch("http://localhost:8080/api/logout", {
-            method: "POST",
-            headers: {"Content-Type" : "application/json"},
-            credentials: "include",
-        });
-        
-        props.setRedirect(true)
-        setName("")
-        window.location.reload()
-    }
-
-    if (props.redirect) {
-      return (  
-          <Redirect to="/login" />
-      );
+    const logout = () => {
+        localStorage.clear();
+        window.location.href = "/login";
     }
 
     let menu;
-    if (islogin) {
+    if (localStorage.getItem("token") != null) {
       menu = (
         <Button
           style={{display: "flex", justifyContent: "flex-end", alignItems: "flex-end"}}
@@ -98,11 +59,11 @@ function Nav(props: {redirect: boolean, setRedirect: (redirect: boolean) => void
               </Typography>   
             </Link> 
             <Grid
-              justify="space-between" // Add it here :)
+              justify="space-between"
               container 
             >
               <Grid item>   
-                {islogin ? (
+                {localStorage.getItem("token") != null ? (
                   <div style={{display: 'flex'}}>
                     <Link className={classes.navlink} to="/create">
                       <Typography variant="subtitle2" style={{marginLeft: '1.5rem', marginTop: '.3rem'}}>   
@@ -118,13 +79,13 @@ function Nav(props: {redirect: boolean, setRedirect: (redirect: boolean) => void
                             ) : ""}   
               </Grid>   
               <Grid item style={{display: 'flex'}}>
-                  {islogin ? (
+                  {localStorage.getItem("token") != null ? (
                     <Grid item style={{marginRight: '.3rem', marginTop: '.3rem'}}>
                       <AccountCircleIcon />
                     </Grid>
                               ) : ""}
                     <Grid item style={{marginRight: '1rem', marginTop: '.3rem'}}> 
-                      {name}
+                      {localStorage.getItem("token") != null ? (localStorage.getItem("studentCode") + " " + localStorage.getItem("prefix") + localStorage.getItem("firstname") + " " + localStorage.getItem("lastname")): ""}
                     </Grid>
                   <Grid item> 
                     {menu}

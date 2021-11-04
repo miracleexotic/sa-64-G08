@@ -10,12 +10,6 @@ export interface DepartmentInterface {
 	faculty  : FacultyInterface         
 }
 
-export interface TeacherRecordInterface {
-	ID           : number
-	teacherName : string          
-	teacherEmail: string          
-}
-
 export interface PrefixInterface {
 	ID	  : number
 	value : string
@@ -31,9 +25,4 @@ export interface StudentRecordInterface {
 	code        : string 
 	departmentID: number           
 	department  : DepartmentInterface      
-	adviserID   : number          
-	adviser     : TeacherRecordInterface
-	
-	// TODO : check creator?
-	// TODO : can del teacher?
 }
